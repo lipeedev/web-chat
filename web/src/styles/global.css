@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind utilities;
+@tailwind components;
+
+.msg-left {
+  text-align: left;;
+}
+
+.msg-right {
+  text-align: right;
+}
+
+*:focus {
+  outline: none !important;
+}
