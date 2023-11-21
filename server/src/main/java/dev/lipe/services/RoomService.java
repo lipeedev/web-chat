@@ -16,6 +16,12 @@ public class RoomService {
   }
 
   public RoomEntity createRoom(String name) {
+    var roomAlreadyExists = this.repository.findByName(name);
+
+    if (roomAlreadyExists != null) {
+      throw new Error("Room " + name + " already exists");
+    }
+
     var room = new RoomEntity(name);
     return this.repository.save(room);
   }

@@ -25,10 +25,19 @@ public class RoomController {
   }
 
   @PostMapping
-  public ResponseEntity<RoomDTO> createRoom(@RequestBody RoomDTO roomDTO) {
-    var room = this.service.createRoom(roomDTO.name());
+  public ResponseEntity<?> createRoom(@RequestBody RoomDTO roomDTO) {
 
-    return ResponseEntity.status(HttpStatus.CREATED).body(new RoomDTO(room.getName()));
+    try {
+      var room = this.service.createRoom(roomDTO.name());
+      var response = new MyHttpResponse<RoomDTO>(HttpStatus.CREATED, new RoomDTO(room.getName()));
+
+      return ResponseEntity.status(response.statusCode()).body(response.data());
+
+    } catch (Error e) {
+      var response = new MyHttpResponse<String>(HttpStatus.BAD_REQUEST, e.getMessage());
+      return ResponseEntity.status(response.statusCode()).body(response);
+    }
+
   }
 
   @GetMapping
