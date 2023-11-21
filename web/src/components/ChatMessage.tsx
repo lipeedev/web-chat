@@ -4,14 +4,16 @@ interface ChatMessageProps {
   message: string;
   animate?: boolean;
   isSender?: boolean;
+  isServer?: boolean
 }
 
 export interface ChatMessageData {
   isSender: boolean;
   message: string;
+  isServer?: boolean;
 }
 
-export function ChatMessage({ message, animate = true, isSender }: ChatMessageProps) {
+export function ChatMessage({ message, animate = true, isSender, isServer = false }: ChatMessageProps) {
   const animation = useSpring({
     from: { opacity: 0, transform: 'translateY(20px)' },
     to: { opacity: 1, transform: 'translateY(0)' },
@@ -23,7 +25,9 @@ export function ChatMessage({ message, animate = true, isSender }: ChatMessagePr
 
   return (
     <animated.div style={animation} className={`mx-1 flex gap-1 ${isSender ? 'flex-row-reverse' : ''}`}>
-      <img src="https://github.com/lipeedev.png" className="h-10 w-10 rounded-full" />
+      {
+        !isServer && <img src="https://github.com/lipeedev.png" className="h-10 w-10 rounded-full" />
+      }
 
       <div className={`${isSender ? colorSender : colorReceiver} py-2 px-3 rounded-2xl`}>
         {message}
