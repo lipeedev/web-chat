@@ -4,11 +4,13 @@ interface ChatMessageProps {
   message: string;
   animate?: boolean;
   isSender?: boolean;
-  isServer?: boolean
+  isServer?: boolean;
+  isTyping?: boolean;
 }
 
 export interface ChatMessageData {
   isSender: boolean;
+  sender: string;
   message: string;
   isServer?: boolean;
 }

@@ -31,7 +31,7 @@ public class MyHandler extends TextWebSocketHandler {
     rooms.get(pathVariables.roomId()).add(session);
 
     var msg = String.format("Welcome to %s", pathVariables.roomId());
-    this.sendMessageJson(session, new JsonMessage(msg, "server"));
+    this.sendMessageJson(session, new JsonMessage(msg, "server", false));
   }
 
   @Override
@@ -40,12 +40,22 @@ public class MyHandler extends TextWebSocketHandler {
     var jsonMessage = this.mapper.readTree(message.getPayload());
     var text = jsonMessage.get("message").asText();
     var username = jsonMessage.get("sender").asText();
+    var isTyping = jsonMessage.get("isTyping").asBoolean();
 
     var pathVariables = this.extractPathVariables(sender.getUri().getPath());
 
+    if (isTyping) {
+      for (WebSocketSession session : this.rooms.get(pathVariables.roomId())) {
+        if (!session.equals(sender)) {
+          this.sendMessageJson(session, new JsonMessage("", username, true));
+        }
+      }
+      return;
+    }
+
     for (WebSocketSession session : this.rooms.get(pathVariables.roomId())) {
       if (!session.equals(sender)) {
-        this.sendMessageJson(session, new JsonMessage(text, username));
+        this.sendMessageJson(session, new JsonMessage(text, username, false));
       }
     }
 
@@ -71,7 +81,7 @@ public class MyHandler extends TextWebSocketHandler {
     return new WebSocketPathVariables(roomId, username);
   }
 
-  private record JsonMessage(String message, String sender) {
+  private record JsonMessage(String message, String sender, Boolean isTyping) {
   }
 
   private record WebSocketPathVariables(String roomId, String username) {

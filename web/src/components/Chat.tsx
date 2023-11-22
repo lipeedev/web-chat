@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 interface WebSocketMessage {
   message: string;
   sender: string;
+  isTyping?: boolean;
 }
 
 interface ChatProps {
@@ -15,7 +16,7 @@ interface ChatProps {
 export function Chat({ username, room }: ChatProps) {
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
   const [newMessage, setNewMessage] = useState<string>('');
-
+  const [usersTyping, setUsersTyping] = useState<string[]>([]);
   const [socket, setSocket] = useState<WebSocket | null>(null);
 
   useEffect(() => {
@@ -23,7 +24,21 @@ export function Chat({ username, room }: ChatProps) {
 
     newSocket.onmessage = event => {
       const data = JSON.parse(event.data) as WebSocketMessage;
-      setMessages(prev => [...prev, { message: data.message, isSender: false, isServer: data.sender === 'server' }]);
+
+      if (data.isTyping) {
+        setUsersTyping(prev => [... new Set([...prev, data.sender])]);
+
+        setTimeout(() => setUsersTyping(prev => prev.filter(user => user !== data.sender)), 2000);
+
+        return;
+      }
+
+      setMessages(prev => [...prev, {
+        message: data.message,
+        sender: data.sender,
+        isSender: false,
+        isServer: data.sender === 'server'
+      }]);
     }
 
     setSocket(newSocket);
@@ -38,15 +53,25 @@ export function Chat({ username, room }: ChatProps) {
     if (!newMessage) return;
 
     if (socket) {
-      setMessages(prev => [...prev, { message: newMessage, isSender: true }]);
-      socket.send(JSON.stringify({ message: newMessage, sender: username }));
+      setMessages(prev => [...prev, { message: newMessage, isSender: true, sender: username }]);
+      socket.send(JSON.stringify({ message: newMessage, sender: username, isTyping: false }));
       setNewMessage('');
     }
 
   }
 
+  const handleTyping = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(event.target.value)
+    socket?.send(JSON.stringify({ message: '', sender: username, isTyping: true }));
+  }
+
   return (
     <div className="mx-2 my-10 p-4 bg-zinc-900/60 flex flex-col rounded-lg h-screen">
+      {
+        usersTyping.length && (
+          <span className="text-yellow-300 text-sm">{usersTyping.length > 3 ? 'several people' : usersTyping.join(' & ')} is typing...</span>
+        )
+      }
 
       <div className="overflow-auto gap-3 flex flex-col">
         {messages.map((data, index) => (
@@ -54,10 +79,10 @@ export function Chat({ username, room }: ChatProps) {
         ))}
       </div>
 
-      <div className="relative py-3 flex mt-auto items-center">
+      <div className="relative pt-1 flex mt-auto items-center">
         <input
           value={newMessage}
-          onChange={event => setNewMessage(event.target.value)}
+          onChange={handleTyping}
           placeholder="Digite a mensagem..."
           className="text-white border-none focus:outline-none py-3 px-4 bg-yellow-400/20 w-full rounded-full"
         />
