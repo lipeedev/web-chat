@@ -2,6 +2,7 @@ package dev.lipe.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +15,7 @@ import dev.lipe.services.RoomService;
 
 @RestController
 @RequestMapping("/api/rooms")
+@CrossOrigin(origins = "*")
 public class RoomController {
   private final RoomService service;
 
@@ -31,11 +33,11 @@ public class RoomController {
       var room = this.service.createRoom(roomDTO.name());
       var response = new MyHttpResponse<RoomDTO>(HttpStatus.CREATED, new RoomDTO(room.getName()));
 
-      return ResponseEntity.status(response.statusCode()).body(response.data());
+      return ResponseEntity.status(response.code()).body(response);
 
     } catch (Error e) {
       var response = new MyHttpResponse<String>(HttpStatus.BAD_REQUEST, e.getMessage());
-      return ResponseEntity.status(response.statusCode()).body(response);
+      return ResponseEntity.status(response.code()).body(response);
     }
 
   }

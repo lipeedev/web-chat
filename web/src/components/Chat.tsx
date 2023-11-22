@@ -9,16 +9,17 @@ interface WebSocketMessage {
 
 interface ChatProps {
   username: string;
+  room: string;
 }
 
-export function Chat({ username }: ChatProps) {
+export function Chat({ username, room }: ChatProps) {
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
   const [newMessage, setNewMessage] = useState<string>('');
 
   const [socket, setSocket] = useState<WebSocket | null>(null);
 
   useEffect(() => {
-    const newSocket = new WebSocket('ws://localhost:8080?username=' + username);
+    const newSocket = new WebSocket(`ws://localhost:8080/chat/${room}/${username}`);
 
     newSocket.onmessage = event => {
       const data = JSON.parse(event.data) as WebSocketMessage;

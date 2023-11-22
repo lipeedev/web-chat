@@ -10,20 +10,28 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Set;
+import java.util.Map;
 
 @Component
 public class MyHandler extends TextWebSocketHandler {
 
-  private final Set<WebSocketSession> sessions = new HashSet<>();
+  private final Map<String, Set<WebSocketSession>> rooms = new HashMap<String, Set<WebSocketSession>>();
   private final ObjectMapper mapper = new ObjectMapper();
 
   @Override
   public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-    sessions.add(session);
+    var pathVariables = this.extractPathVariables(session.getUri().getPath());
 
-    var username = this.getUsernameFromSession(session);
-    this.sendMessageJson(session, new JsonMessage("Welcome to the chat " + username, "server"));
+    if (!rooms.containsKey(pathVariables.roomId())) {
+      rooms.put(pathVariables.roomId(), new HashSet<WebSocketSession>());
+    }
+
+    rooms.get(pathVariables.roomId()).add(session);
+
+    var msg = String.format("Welcome to %s", pathVariables.roomId());
+    this.sendMessageJson(session, new JsonMessage(msg, "server"));
   }
 
   @Override
@@ -33,7 +41,9 @@ public class MyHandler extends TextWebSocketHandler {
     var text = jsonMessage.get("message").asText();
     var username = jsonMessage.get("sender").asText();
 
-    for (WebSocketSession session : sessions) {
+    var pathVariables = this.extractPathVariables(sender.getUri().getPath());
+
+    for (WebSocketSession session : this.rooms.get(pathVariables.roomId())) {
       if (!session.equals(sender)) {
         this.sendMessageJson(session, new JsonMessage(text, username));
       }
@@ -43,7 +53,8 @@ public class MyHandler extends TextWebSocketHandler {
 
   @Override
   public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-    sessions.remove(session);
+    var pathVariables = this.extractPathVariables(session.getUri().getPath());
+    this.rooms.get(pathVariables.roomId()).remove(session);
   }
 
   private void sendMessageJson(WebSocketSession session, Object message) throws IOException {
@@ -53,10 +64,16 @@ public class MyHandler extends TextWebSocketHandler {
     session.sendMessage(new TextMessage(mapper.writeValueAsString(message)));
   }
 
-  private String getUsernameFromSession(WebSocketSession session) {
-    return session.getUri().toString().split("username=")[1];
+  private WebSocketPathVariables extractPathVariables(String path) {
+    String[] pathSegments = path.split("/");
+    String roomId = (pathSegments.length >= 3) ? pathSegments[2] : null;
+    String username = (pathSegments.length >= 3) ? pathSegments[3] : null;
+    return new WebSocketPathVariables(roomId, username);
   }
 
   private record JsonMessage(String message, String sender) {
+  }
+
+  private record WebSocketPathVariables(String roomId, String username) {
   }
 }
