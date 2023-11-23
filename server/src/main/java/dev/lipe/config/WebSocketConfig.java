@@ -13,11 +13,17 @@ public class WebSocketConfig implements WebSocketConfigurer {
   @Override
   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
     registry.addHandler(this.webSocketHandler(), "/chat/{roomId}/{username}").setAllowedOrigins("*");
+    registry.addHandler(this.videoHandler(), "/video").setAllowedOrigins("*");
   }
 
   @Bean
   public MyHandler webSocketHandler() {
     return new MyHandler();
+  }
+
+  @Bean
+  public VideoHandler videoHandler() {
+    return new VideoHandler();
   }
 
 }
