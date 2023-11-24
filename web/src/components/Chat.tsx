@@ -26,15 +26,16 @@ export function Chat({ username, room }: ChatProps) {
       const data = JSON.parse(event.data) as WebSocketMessage;
 
       if (data.isTyping) {
-        setUsersTyping(prev => [... new Set([...prev, data.sender])]);
-
-        setTimeout(() => setUsersTyping(prev => prev.filter(user => user !== data.sender)), 2000);
+        if (!usersTyping.includes(data.sender)) {
+          setUsersTyping(prev => [... new Set([...prev, data.sender])]);
+          setTimeout(() => setUsersTyping(prev => prev.filter(user => user !== data.sender)), 2000);
+        }
 
         return;
       }
 
       setMessages(prev => [...prev, {
-        message: data.message,
+        content: data.message,
         sender: data.sender,
         isSender: false,
         isServer: data.sender === 'server'
@@ -53,7 +54,7 @@ export function Chat({ username, room }: ChatProps) {
     if (!newMessage) return;
 
     if (socket) {
-      setMessages(prev => [...prev, { message: newMessage, isSender: true, sender: username }]);
+      setMessages(prev => [...prev, { content: newMessage, isSender: true, sender: username }]);
       socket.send(JSON.stringify({ message: newMessage, sender: username, isTyping: false }));
       setNewMessage('');
     }
@@ -73,9 +74,9 @@ export function Chat({ username, room }: ChatProps) {
         )
       }
 
-      <div className="overflow-auto gap-3 flex flex-col">
+      <div className="mb-1 overflow-x-hidden overflow-y-scroll gap-3 flex flex-col">
         {messages.map((data, index) => (
-          <ChatMessage key={index} isSender={data.isSender} message={data.message} animate={index === messages.length - 1} isServer={data.isServer} />
+          <ChatMessage key={index} isSender={data.isSender} message={data} animate={index === messages.length - 1} isServer={data.isServer} />
         ))}
       </div>
 
