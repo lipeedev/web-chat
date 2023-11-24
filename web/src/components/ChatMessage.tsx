@@ -18,8 +18,8 @@ export interface ChatMessageData {
 
 export function ChatMessage({ profileImg, message, animate = true, isSender, isServer = false }: ChatMessageProps) {
   const animation = useSpring({
-    from: { opacity: 0, transform: 'translateY(20px)' },
-    to: { opacity: 1, transform: 'translateY(0)' },
+    from: { opacity: 0, transform: isSender ? 'translateX(20px)' : 'translateX(-20px)' },
+    to: { opacity: 1, transform: 'translateX(0)' },
     immediate: !animate,
   });
 
@@ -33,11 +33,11 @@ export function ChatMessage({ profileImg, message, animate = true, isSender, isS
       }
 
       <div className={`${isSender ? colorSender : colorReceiver} py-2 px-3 rounded-2xl flex flex-col gap-1 max-w-md`}>
-        <span className='font-semibold text-md'>{message.sender}</span>
-        
+        <span className='font-bold text-md'>{message.sender}</span>
+
         <div className="flex gap-4">
-          <p className="whitespace-normal break-words">{message.content.trim()}</p>
-          <span className="self-end text-gray-200 text-xs">{new Date().toLocaleTimeString('pt-br', {timeStyle: 'short'})}</span>
+          <p className="whitespace-normal break-words text-gray-100">{message.content.trim()}</p>
+          <span className="self-end text-gray-300 text-xs">{new Date().toLocaleTimeString('pt-br', { timeStyle: 'short' })}</span>
         </div>
       </div>
     </animated.div>

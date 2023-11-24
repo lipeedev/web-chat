@@ -51,7 +51,10 @@ export function Chat({ username, room }: ChatProps) {
   }, [])
 
   const sendMessage = () => {
-    if (!newMessage) return;
+    if (!newMessage.trim().length) {
+      setNewMessage('');
+      return;
+    }
 
     if (socket) {
       setMessages(prev => [...prev, { content: newMessage, isSender: true, sender: username }]);
@@ -67,20 +70,18 @@ export function Chat({ username, room }: ChatProps) {
   }
 
   return (
-    <div className="mx-2 my-10 p-4 bg-zinc-900/60 flex flex-col rounded-lg h-screen">
+    <div className="mx-2 mb-7 py-2 px-4 bg-zinc-900/60 flex flex-col rounded-lg h-screen">
       {
-        usersTyping.length && (
-          <span className="text-yellow-300 text-sm">{usersTyping.length > 3 ? 'several people' : usersTyping.join(' & ')} is typing...</span>
-        )
+        (usersTyping.length > 0) && <p className="text-yellow-300 text-sm">{usersTyping.length > 3 ? 'several people' : usersTyping.join(' & ')} is typing...</p>
       }
 
       <div className="mb-1 overflow-x-hidden overflow-y-scroll gap-3 flex flex-col">
-        {messages.map((data, index) => (
+        {messages.length && messages.map((data, index) => (
           <ChatMessage key={index} isSender={data.isSender} message={data} animate={index === messages.length - 1} isServer={data.isServer} />
         ))}
       </div>
 
-      <div className="relative pt-1 flex mt-auto items-center">
+      <div className="relative pt-1 mb-2 flex mt-auto items-center">
         <input
           value={newMessage}
           onChange={handleTyping}

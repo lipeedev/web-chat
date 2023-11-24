@@ -29,28 +29,24 @@ export function App() {
   }
 
   return (
-    <>
-      <div className="m-3 flex gap-3 justify-center">
+    <div>
+      <div className={`mx-3 my-1 ${!currentRoom && 'flex justify-center'}`}>
         {
           !currentRoom
             ? <input className="bg-yellow-100/20 rounded-md p-4 text-white placeholder-gray-300" type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
             : (
-              <>
-                <button onClick={handleQuitRoom}>
-                  <ChevronLeft height={24} width={24} className="text-yellow-300" />
-                </button>
-
-                <h1 className="rounded-lg bg-yellow-100/20 p-4 text-2xl text-yellow-300">Connected as {username}</h1>
-              </>
+              <button onClick={handleQuitRoom}>
+                <ChevronLeft height={30} width={30} className="text-yellow-300" />
+              </button>
             )
         }
       </div>
 
       <div className={!currentRoom ? 'm-4 gap-2 grid grid-cols-3' : ''}>
-        {(rooms?.length && !currentRoom) && rooms.map(room => <button className="p-4 bg-yellow-300/60 text-gray-300 rounded-lg" onClick={() => handleJoinRoom(room.name)}>{room.name}</button>)}
+        {(rooms?.length && !currentRoom) && rooms.map((room, index) => <button key={index} className="p-4 bg-yellow-300/60 text-gray-300 rounded-lg" onClick={() => handleJoinRoom(room.name)}>{room.name}</button>)}
         {currentRoom && <Chat username={username} room={currentRoom} />}
       </div>
-    </>
+    </div>
   )
 
 }
