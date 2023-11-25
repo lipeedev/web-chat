@@ -1,3 +1,4 @@
+import { BadgeInfo } from "lucide-react";
 import { animated, useSpring } from "react-spring";
 
 interface ChatMessageProps {
@@ -33,7 +34,10 @@ export function ChatMessage({ profileImg, message, animate = true, isSender, isS
       }
 
       <div className={`${isSender ? colorSender : colorReceiver} py-2 px-3 rounded-2xl flex flex-col gap-1 max-w-md`}>
-        <span className='font-bold text-md'>{message.sender}</span>
+        <div className="flex justify-between">
+          <span className='font-bold text-md'>{message.sender}</span>
+          {isServer && <BadgeInfo className="text-yellow-200" />}
+        </div>
 
         <div className="flex gap-4">
           <p className="whitespace-normal break-words text-gray-100">{message.content.trim()}</p>

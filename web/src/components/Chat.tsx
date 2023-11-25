@@ -76,7 +76,7 @@ export function Chat({ username, room }: ChatProps) {
       }
 
       <div className="mb-1 overflow-x-hidden overflow-y-scroll gap-3 flex flex-col">
-        {messages.length && messages.map((data, index) => (
+        {(messages.length > 0) && messages.map((data, index) => (
           <ChatMessage key={index} isSender={data.isSender} message={data} animate={index === messages.length - 1} isServer={data.isServer} />
         ))}
       </div>

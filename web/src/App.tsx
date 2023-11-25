@@ -10,7 +10,7 @@ interface Room {
 export function App() {
   const [username, setUsername] = useState<string>('');
   const [currentRoom, setCurrentRoom] = useState<string>('')
-  const [rooms, setRooms] = useState<Room[]>()
+  const [rooms, setRooms] = useState<Room[]>([])
 
   useEffect(() => {
     axios.get('http://localhost:8080/api/rooms')
@@ -43,7 +43,7 @@ export function App() {
       </div>
 
       <div className={!currentRoom ? 'm-4 gap-2 grid grid-cols-3' : ''}>
-        {(rooms?.length && !currentRoom) && rooms.map((room, index) => <button key={index} className="p-4 bg-yellow-300/60 text-gray-300 rounded-lg" onClick={() => handleJoinRoom(room.name)}>{room.name}</button>)}
+        {(rooms.length > 0 && !currentRoom) && rooms.map((room, index) => <button key={index} className="p-4 bg-yellow-300/60 text-gray-300 rounded-lg" onClick={() => handleJoinRoom(room.name)}>{room.name}</button>)}
         {currentRoom && <Chat username={username} room={currentRoom} />}
       </div>
     </div>
