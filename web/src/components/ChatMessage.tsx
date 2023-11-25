@@ -25,25 +25,25 @@ export function ChatMessage({ profileImg = '/default.png', message, animate = tr
     immediate: !animate,
   });
 
-  const colorSender = 'bg-yellow-300/40 text-white'
-  const colorReceiver = `${isServer ? 'bg-yellow-300/20' : 'bg-yellow-100/20'} text-gray-200`
+  const colorSender = `bg-yellow-300/40 text-white ${!isLastMsgFromSender ? 'rounded-tl-2xl rounded-bl-2xl rounded-br-2xl' : 'rounded-2xl'}`
+  const colorReceiver = `${isServer ? 'bg-yellow-300/20' : 'bg-yellow-100/20'} ${(!isLastMsgFromSender && !isServer) ? 'rounded-bl-2xl rounded-br-2xl rounded-tr-2xl' : 'rounded-2xl'} text-gray-200`
   if (isServer) {
     message.sender = message.sender[0].toUpperCase() + message.sender.slice(1)
   }
 
   return (
-    <animated.div style={animation} className={`mx-1 gap-2 flex ${isSender && 'flex-row-reverse'} ${isLastMsgFromSender ? 'mt-1' : 'mt-3'}`}>
-      {(!isServer && !isLastMsgFromSender) && <img src={profileImg} className="h-9 w-9 rounded-full mt-2" />}
+    <animated.div style={animation} className={`mx-1 gap-2 flex ${isSender && 'flex-row-reverse'} ${isLastMsgFromSender ? 'mt-1' : 'mt-3'} ${isServer && 'justify-center'}`}>
+      {(!isServer && !isLastMsgFromSender) && <img src={profileImg} className="h-9 w-9 rounded-full" />}
       {(!isServer && isLastMsgFromSender) && <div className="w-9" />}
 
-      <div className={`${isSender ? colorSender : colorReceiver} py-2 px-3 rounded-2xl flex flex-col gap-1 max-w-md`}>
+      <div className={`${isSender ? colorSender : colorReceiver} py-2 px-3 flex flex-col gap-1 max-w-md`}>
         <div className="flex justify-between">
-          <span className='font-bold text-md'>{message.sender}</span>
+          {!isSender && <span className='font-bold text-md'>{message.sender}</span>}
           {isServer && <BadgeInfo className="text-yellow-200" />}
         </div>
 
-        <div className="flex gap-4">
-          <p className="whitespace-normal break-words text-gray-100">{message.content.trim()}</p>
+        <div className="flex justify-between">
+          <p className="pr-4 whitespace-normal break-words text-gray-100">{message.content.trim()}</p>
           <span className="self-end text-gray-300 text-xs">{new Date().toLocaleTimeString('pt-br', { timeStyle: 'short' })}</span>
         </div>
       </div>
