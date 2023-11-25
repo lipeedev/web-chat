@@ -75,9 +75,16 @@ export function Chat({ username, room }: ChatProps) {
         (usersTyping.length > 0) && <p className="text-yellow-300 text-sm">{usersTyping.length > 3 ? 'several people' : usersTyping.join(' & ')} is typing...</p>
       }
 
-      <div className="mb-1 overflow-x-hidden overflow-y-scroll gap-3 flex flex-col">
+      <div className="mb-1 overflow-x-hidden overflow-y-scroll flex flex-col">
         {(messages.length > 0) && messages.map((data, index) => (
-          <ChatMessage key={index} isSender={data.isSender} message={data} animate={index === messages.length - 1} isServer={data.isServer} />
+          <ChatMessage
+            key={index}
+            isSender={data.isSender}
+            message={data}
+            animate={index === messages.length - 1}
+            isServer={data.isServer}
+            isLastMsgFromSender={messages[index - 1]?.sender === data.sender && !data.isServer}
+          />
         ))}
       </div>
 
@@ -85,8 +92,8 @@ export function Chat({ username, room }: ChatProps) {
         <input
           value={newMessage}
           onChange={handleTyping}
-          placeholder="Digite a mensagem..."
-          className="text-white border-none focus:outline-none py-3 px-4 bg-yellow-400/20 w-full rounded-full"
+          placeholder="Message..."
+          className="text-white border-none focus:outline-none py-3 px-4 bg-yellow-300/20 w-full rounded-full"
         />
 
         <button className="mx-3 absolute right-0" onClick={sendMessage}>

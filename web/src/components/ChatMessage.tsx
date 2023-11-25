@@ -7,6 +7,7 @@ interface ChatMessageProps {
   isSender?: boolean;
   isServer?: boolean;
   isTyping?: boolean;
+  isLastMsgFromSender?: boolean;
   profileImg?: string;
 }
 
@@ -17,7 +18,7 @@ export interface ChatMessageData {
   isServer?: boolean;
 }
 
-export function ChatMessage({ profileImg, message, animate = true, isSender, isServer = false }: ChatMessageProps) {
+export function ChatMessage({ profileImg = '/default.png', message, animate = true, isSender, isServer = false, isLastMsgFromSender }: ChatMessageProps) {
   const animation = useSpring({
     from: { opacity: 0, transform: isSender ? 'translateX(20px)' : 'translateX(-20px)' },
     to: { opacity: 1, transform: 'translateX(0)' },
@@ -25,13 +26,15 @@ export function ChatMessage({ profileImg, message, animate = true, isSender, isS
   });
 
   const colorSender = 'bg-yellow-300/40 text-white'
-  const colorReceiver = 'bg-yellow-300/20 text-gray-200'
+  const colorReceiver = `${isServer ? 'bg-yellow-300/20' : 'bg-yellow-100/20'} text-gray-200`
+  if (isServer) {
+    message.sender = message.sender[0].toUpperCase() + message.sender.slice(1)
+  }
 
   return (
-    <animated.div style={animation} className={`mx-1 flex ${isSender ? 'flex-row-reverse' : ''}`}>
-      {
-        (!isServer && profileImg) && <img src={profileImg} className="h-10 w-10 rounded-full" />
-      }
+    <animated.div style={animation} className={`mx-1 gap-2 flex ${isSender && 'flex-row-reverse'} ${isLastMsgFromSender ? 'mt-1' : 'mt-3'}`}>
+      {(!isServer && !isLastMsgFromSender) && <img src={profileImg} className="h-9 w-9 rounded-full mt-2" />}
+      {(!isServer && isLastMsgFromSender) && <div className="w-9" />}
 
       <div className={`${isSender ? colorSender : colorReceiver} py-2 px-3 rounded-2xl flex flex-col gap-1 max-w-md`}>
         <div className="flex justify-between">

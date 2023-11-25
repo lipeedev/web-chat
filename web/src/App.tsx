@@ -43,7 +43,7 @@ export function App() {
       </div>
 
       <div className={!currentRoom ? 'm-4 gap-2 grid grid-cols-3' : ''}>
-        {(rooms.length > 0 && !currentRoom) && rooms.map((room, index) => <button key={index} className="p-4 bg-yellow-300/60 text-gray-300 rounded-lg" onClick={() => handleJoinRoom(room.name)}>{room.name}</button>)}
+        {(rooms.length > 0 && !currentRoom) && rooms.map((room, index) => <button key={index} className="p-4 bg-yellow-300/60 text-gray-100 rounded-lg" onClick={() => handleJoinRoom(room.name)}>{room.name}</button>)}
         {currentRoom && <Chat username={username} room={currentRoom} />}
       </div>
     </div>
