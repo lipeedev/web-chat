@@ -13,7 +13,7 @@ export function App() {
   const [rooms, setRooms] = useState<Room[]>([])
 
   useEffect(() => {
-    axios.get('http://localhost:8080/api/rooms')
+    axios.get(import.meta.env.VITE_API_URL + '/api/rooms')
       .then(({ data }: AxiosResponse<Room[]>) => setRooms(data))
       .catch(console.error)
   }, [])

@@ -20,7 +20,7 @@ export function Chat({ username, room }: ChatProps) {
   const [socket, setSocket] = useState<WebSocket | null>(null);
 
   useEffect(() => {
-    const newSocket = new WebSocket(`ws://localhost:8080/chat/${room}/${username}`);
+    const newSocket = new WebSocket(`${import.meta.env.VITE_API_URL.replace('http', 'ws')}/chat/${room}/${username}`);
 
     newSocket.onmessage = event => {
       const data = JSON.parse(event.data) as WebSocketMessage;
