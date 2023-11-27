@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import dev.lipe.dtos.RoomDTO;
 import dev.lipe.services.RoomService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/rooms")
@@ -23,22 +25,13 @@ public class RoomController {
     this.service = service;
   }
 
-  private record RoomDTO(String name) {
-  }
-
   @PostMapping
-  public ResponseEntity<?> createRoom(@RequestBody RoomDTO roomDTO) {
+  public ResponseEntity<?> createRoom(@RequestBody @Valid RoomDTO roomDTO) {
 
-    try {
-      var room = this.service.createRoom(roomDTO.name());
-      var response = new MyHttpResponse<RoomDTO>(HttpStatus.CREATED, new RoomDTO(room.getName()));
+    var room = this.service.createRoom(roomDTO.name());
+    var response = new MyHttpResponse<RoomDTO>(HttpStatus.CREATED, new RoomDTO(room.getName()));
 
-      return ResponseEntity.status(response.code()).body(response);
-
-    } catch (Error e) {
-      var response = new MyHttpResponse<String>(HttpStatus.BAD_REQUEST, e.getMessage());
-      return ResponseEntity.status(response.code()).body(response);
-    }
+    return ResponseEntity.status(response.code()).body(response);
 
   }
 
