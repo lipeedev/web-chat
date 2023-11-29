@@ -19,6 +19,7 @@ public class MyHandler extends TextWebSocketHandler {
 
   private final Map<String, Set<WebSocketSession>> rooms = new HashMap<String, Set<WebSocketSession>>();
   private final ObjectMapper mapper = new ObjectMapper();
+  private String base64Received = "";
 
   @Override
   public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -31,13 +32,13 @@ public class MyHandler extends TextWebSocketHandler {
     rooms.get(pathVariables.roomId()).add(session);
 
     var msgToUserConnected = String.format("Welcome to %s.", pathVariables.roomId());
-    this.sendMessageJson(session, new JsonMessage(msgToUserConnected, "server", false));
+    this.sendMessageJson(session, new JsonMessage(false, msgToUserConnected, "server", false));
 
     var msgToOtherUsers = String.format("%s joined the room.", pathVariables.username());
 
     for (var s : this.rooms.get(pathVariables.roomId())) {
       if (!s.equals(session)) {
-        this.sendMessageJson(s, new JsonMessage(msgToOtherUsers, "server", false));
+        this.sendMessageJson(s, new JsonMessage(false, msgToOtherUsers, "server", false));
       }
     }
   }
@@ -46,16 +47,16 @@ public class MyHandler extends TextWebSocketHandler {
   protected void handleTextMessage(WebSocketSession sender, TextMessage message) throws Exception {
 
     var jsonMessage = this.mapper.readTree(message.getPayload());
-    var text = jsonMessage.get("message").asText();
     var username = jsonMessage.get("sender").asText();
     var isTyping = jsonMessage.get("isTyping").asBoolean();
+    var isAudio = jsonMessage.get("isAudio").asBoolean();
 
     var pathVariables = this.extractPathVariables(sender.getUri().getPath());
 
     if (isTyping) {
       for (var session : this.rooms.get(pathVariables.roomId())) {
         if (!session.equals(sender)) {
-          this.sendMessageJson(session, new JsonMessage("", username, true));
+          this.sendMessageJson(session, new JsonMessage(false, "", username, true));
         }
       }
       return;
@@ -63,7 +64,23 @@ public class MyHandler extends TextWebSocketHandler {
 
     for (WebSocketSession session : this.rooms.get(pathVariables.roomId())) {
       if (!session.equals(sender)) {
-        this.sendMessageJson(session, new JsonMessage(text, username, false));
+
+        if (isAudio) {
+          var isChunkEnd = jsonMessage.get("isChunkEnd").asBoolean();
+
+          if (!isChunkEnd) {
+            var chunkArray = mapper.convertValue(jsonMessage.get("message"), String[].class);
+            this.base64Received += chunkArray[0];
+          } else {
+            this.sendMessageJson(session, new JsonMessage(true, base64Received, username, false));
+            this.base64Received = "";
+          }
+
+        } else {
+          var text = jsonMessage.get("message").asText();
+          this.sendMessageJson(session, new JsonMessage((isAudio) ? true : false, text, username, false));
+        }
+
       }
     }
 
@@ -73,6 +90,14 @@ public class MyHandler extends TextWebSocketHandler {
   public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
     var pathVariables = this.extractPathVariables(session.getUri().getPath());
     this.rooms.get(pathVariables.roomId()).remove(session);
+
+    var msgToOtherUsers = String.format("%s left the room.", pathVariables.username());
+
+    for (var s : this.rooms.get(pathVariables.roomId())) {
+      if (!s.equals(session)) {
+        this.sendMessageJson(s, new JsonMessage(false, msgToOtherUsers, "server", false));
+      }
+    }
   }
 
   private void sendMessageJson(WebSocketSession session, Object message) throws IOException {
@@ -89,7 +114,7 @@ public class MyHandler extends TextWebSocketHandler {
     return new WebSocketPathVariables(roomId, username);
   }
 
-  private record JsonMessage(String message, String sender, Boolean isTyping) {
+  private record JsonMessage(Boolean isAudio, String message, String sender, Boolean isTyping) {
   }
 
   private record WebSocketPathVariables(String roomId, String username) {

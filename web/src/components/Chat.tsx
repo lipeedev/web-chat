@@ -1,11 +1,13 @@
 import { SendHorizonal } from "lucide-react";
 import { ChatMessage, ChatMessageData } from "./ChatMessage";
 import { useEffect, useState } from "react";
+import { VoiceRecorder } from "./VoiceRecorder";
 
-interface WebSocketMessage {
+export interface WebSocketMessage {
   message: string;
   sender: string;
   isTyping?: boolean;
+  isAudio?: boolean
 }
 
 interface ChatProps {
@@ -18,12 +20,34 @@ export function Chat({ username, room }: ChatProps) {
   const [newMessage, setNewMessage] = useState<string>('');
   const [usersTyping, setUsersTyping] = useState<string[]>([]);
   const [socket, setSocket] = useState<WebSocket | null>(null);
+  const [currentVoiceMsg, setCurrentVoiceMsg] = useState<WebSocketMessage | null>(null)
 
   useEffect(() => {
+    if (currentVoiceMsg) {
+      const chunks: string[] = []
+      const chunkSize = 1024
+      const base64AudioString = currentVoiceMsg.message
+
+      for (let i = 0; i < base64AudioString.length; i += chunkSize) {
+        chunks.push(base64AudioString.slice(i, i + chunkSize));
+      }
+
+      chunks.forEach(chunk => {
+        socket?.send(JSON.stringify({ ...currentVoiceMsg, message: [chunk], isChunkEnd: false }))
+      })
+
+      socket?.send(JSON.stringify({ ...currentVoiceMsg, message: null, isChunkEnd: true }))
+
+    }
+  }, [currentVoiceMsg])
+
+  useEffect(() => {
+    if (socket) return;
+
     const newSocket = new WebSocket(`${import.meta.env.VITE_API_URL.replace('http', 'ws')}/chat/${room}/${username}`);
 
     newSocket.onmessage = event => {
-      const data = JSON.parse(event.data) as WebSocketMessage;
+      const data = JSON.parse(event.data) as WebSocketMessage
 
       if (data.isTyping) {
         if (!usersTyping.includes(data.sender)) {
@@ -38,14 +62,15 @@ export function Chat({ username, room }: ChatProps) {
         content: data.message,
         sender: data.sender,
         isSender: false,
-        isServer: data.sender === 'server'
+        isServer: data.sender === 'server',
+        isAudio: data.isAudio
       }]);
     }
 
     setSocket(newSocket);
 
     return () => {
-      newSocket.close();
+      newSocket.close()
     }
 
   }, [])
@@ -58,7 +83,7 @@ export function Chat({ username, room }: ChatProps) {
 
     if (socket) {
       setMessages(prev => [...prev, { content: newMessage, isSender: true, sender: username }]);
-      socket.send(JSON.stringify({ message: newMessage, sender: username, isTyping: false }));
+      socket.send(JSON.stringify({ message: newMessage, sender: username, isTyping: false, isAudio: false }));
       setNewMessage('');
     }
 
@@ -66,7 +91,7 @@ export function Chat({ username, room }: ChatProps) {
 
   const handleTyping = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(event.target.value)
-    socket?.send(JSON.stringify({ message: '', sender: username, isTyping: true }));
+    socket?.send(JSON.stringify({ message: '', sender: username, isTyping: true, isAudio: false }));
   }
 
   return (
@@ -96,9 +121,11 @@ export function Chat({ username, room }: ChatProps) {
           className="text-white border-none focus:outline-none py-3 px-4 bg-yellow-300/20 w-full rounded-full"
         />
 
-        <button className="mx-3 absolute right-0" onClick={sendMessage}>
+        <button className="mr-10 absolute right-0" onClick={sendMessage}>
           <SendHorizonal height={24} width={24} className="text-yellow-100 cursor-pointer" />
         </button>
+
+        <VoiceRecorder setCurrentVoiceMsg={setCurrentVoiceMsg} sender={username} setMessages={setMessages} />
       </div>
 
     </div >
