@@ -9,9 +9,10 @@ interface VoiceRecorderProps {
   setMessages: Dispatch<React.SetStateAction<ChatMessageData[]>>
   setCurrentVoiceMsg: Dispatch<React.SetStateAction<WebSocketMessage | null>>
   sender: string;
+  profileImage: string | null
 }
 
-export function VoiceRecorder({ setCurrentVoiceMsg, setMessages, sender }: VoiceRecorderProps) {
+export function VoiceRecorder({ profileImage, setCurrentVoiceMsg, setMessages, sender }: VoiceRecorderProps) {
   const [isRecording, setIsRecording] = useState(false)
 
   const onStop = async (recorded: ReactMicStopEvent) => {
@@ -21,7 +22,8 @@ export function VoiceRecorder({ setCurrentVoiceMsg, setMessages, sender }: Voice
       sender,
       content: recorded.blobURL,
       isSender: true,
-      isAudio: true
+      isAudio: true,
+      profileImage
     }
 
     setMessages(prev => [...prev, data])
@@ -32,7 +34,8 @@ export function VoiceRecorder({ setCurrentVoiceMsg, setMessages, sender }: Voice
       isTyping: false,
       message: content,
       isAudio: true,
-      sender: data.sender
+      sender: data.sender,
+      profileImage
     })
 
   }

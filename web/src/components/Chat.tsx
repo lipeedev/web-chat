@@ -8,14 +8,16 @@ export interface WebSocketMessage {
   sender: string;
   isTyping?: boolean;
   isAudio?: boolean
+  profileImage: string | null
 }
 
 interface ChatProps {
   username: string;
   room: string;
+  profileImage: string | null;
 }
 
-export function Chat({ username, room }: ChatProps) {
+export function Chat({ profileImage, username, room }: ChatProps) {
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
   const [newMessage, setNewMessage] = useState<string>('');
   const [usersTyping, setUsersTyping] = useState<string[]>([]);
@@ -63,7 +65,8 @@ export function Chat({ username, room }: ChatProps) {
         sender: data.sender,
         isSender: false,
         isServer: data.sender === 'server',
-        isAudio: data.isAudio
+        isAudio: data.isAudio,
+        profileImage: data.profileImage
       }]);
     }
 
@@ -82,13 +85,13 @@ export function Chat({ username, room }: ChatProps) {
     }
 
     if (socket) {
-      setMessages(prev => [...prev, { content: newMessage, isSender: true, sender: username }]);
-      socket.send(JSON.stringify({ message: newMessage, sender: username, isTyping: false, isAudio: false }));
+      setMessages(prev => [...prev, { content: newMessage, isSender: true, sender: username, profileImage }]);
+      socket.send(JSON.stringify({ message: newMessage, sender: username, isTyping: false, isAudio: false, profileImage }));
       setNewMessage('');
     }
 
   }
-
+  
   const handleTyping = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(event.target.value)
     socket?.send(JSON.stringify({ message: '', sender: username, isTyping: true, isAudio: false }));
@@ -125,7 +128,7 @@ export function Chat({ username, room }: ChatProps) {
           <SendHorizonal height={24} width={24} className="text-yellow-100 cursor-pointer" />
         </button>
 
-        <VoiceRecorder setCurrentVoiceMsg={setCurrentVoiceMsg} sender={username} setMessages={setMessages} />
+        <VoiceRecorder profileImage={profileImage} setCurrentVoiceMsg={setCurrentVoiceMsg} sender={username} setMessages={setMessages} />
       </div>
 
     </div >

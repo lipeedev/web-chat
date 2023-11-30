@@ -8,6 +8,8 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import dev.lipe.utils.JsonMessage;
+
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.HashMap;
@@ -32,13 +34,13 @@ public class MyHandler extends TextWebSocketHandler {
     rooms.get(pathVariables.roomId()).add(session);
 
     var msgToUserConnected = String.format("Welcome to %s.", pathVariables.roomId());
-    this.sendMessageJson(session, new JsonMessage(false, msgToUserConnected, "server", false));
+    this.sendMessageJson(session, new JsonMessage(false, msgToUserConnected, "server", false, null));
 
     var msgToOtherUsers = String.format("%s joined the room.", pathVariables.username());
 
     for (var s : this.rooms.get(pathVariables.roomId())) {
       if (!s.equals(session)) {
-        this.sendMessageJson(s, new JsonMessage(false, msgToOtherUsers, "server", false));
+        this.sendMessageJson(s, new JsonMessage(false, msgToOtherUsers, "server", false, null));
       }
     }
   }
@@ -48,6 +50,7 @@ public class MyHandler extends TextWebSocketHandler {
 
     var jsonMessage = this.mapper.readTree(message.getPayload());
     var username = jsonMessage.get("sender").asText();
+    var profileImage = mapper.convertValue(jsonMessage.get("profileImage"), String.class);
     var isTyping = jsonMessage.get("isTyping").asBoolean();
     var isAudio = jsonMessage.get("isAudio").asBoolean();
 
@@ -56,7 +59,7 @@ public class MyHandler extends TextWebSocketHandler {
     if (isTyping) {
       for (var session : this.rooms.get(pathVariables.roomId())) {
         if (!session.equals(sender)) {
-          this.sendMessageJson(session, new JsonMessage(false, "", username, true));
+          this.sendMessageJson(session, new JsonMessage(false, "", username, true, profileImage));
         }
       }
       return;
@@ -72,13 +75,13 @@ public class MyHandler extends TextWebSocketHandler {
             var chunkArray = mapper.convertValue(jsonMessage.get("message"), String[].class);
             this.base64Received += chunkArray[0];
           } else {
-            this.sendMessageJson(session, new JsonMessage(true, base64Received, username, false));
+            this.sendMessageJson(session, new JsonMessage(true, base64Received, username, false, profileImage));
             this.base64Received = "";
           }
 
         } else {
           var text = jsonMessage.get("message").asText();
-          this.sendMessageJson(session, new JsonMessage((isAudio) ? true : false, text, username, false));
+          this.sendMessageJson(session, new JsonMessage((isAudio) ? true : false, text, username, false, profileImage));
         }
 
       }
@@ -95,7 +98,7 @@ public class MyHandler extends TextWebSocketHandler {
 
     for (var s : this.rooms.get(pathVariables.roomId())) {
       if (!s.equals(session)) {
-        this.sendMessageJson(s, new JsonMessage(false, msgToOtherUsers, "server", false));
+        this.sendMessageJson(s, new JsonMessage(false, msgToOtherUsers, "server", false, null));
       }
     }
   }
@@ -112,9 +115,6 @@ public class MyHandler extends TextWebSocketHandler {
     String roomId = (pathSegments.length >= 3) ? pathSegments[2] : null;
     String username = (pathSegments.length >= 3) ? pathSegments[3] : null;
     return new WebSocketPathVariables(roomId, username);
-  }
-
-  private record JsonMessage(Boolean isAudio, String message, String sender, Boolean isTyping) {
   }
 
   private record WebSocketPathVariables(String roomId, String username) {

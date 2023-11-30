@@ -9,7 +9,6 @@ interface ChatMessageProps {
   isServer?: boolean;
   isTyping?: boolean;
   isLastMsgFromSender?: boolean;
-  profileImg?: string;
 }
 
 export interface ChatMessageData {
@@ -18,9 +17,10 @@ export interface ChatMessageData {
   content: string;
   isServer?: boolean;
   isAudio?: boolean;
+  profileImage: string | null;
 }
 
-export function ChatMessage({ profileImg = '/default.png', message, animate = true, isSender, isServer = false, isLastMsgFromSender }: ChatMessageProps) {
+export function ChatMessage({ message, animate = true, isSender, isServer = false, isLastMsgFromSender }: ChatMessageProps) {
   const animation = useSpring({
     from: { opacity: 0, transform: isSender ? 'translateX(20px)' : 'translateX(-20px)' },
     to: { opacity: 1, transform: 'translateX(0)' },
@@ -35,7 +35,7 @@ export function ChatMessage({ profileImg = '/default.png', message, animate = tr
 
   return (
     <animated.div style={animation} className={`mx-1 gap-2 flex ${isSender && 'flex-row-reverse'} ${isLastMsgFromSender ? 'mt-1' : 'mt-3'} ${isServer && 'justify-center'}`}>
-      {(!isServer && !isLastMsgFromSender) && <img src={profileImg} className="h-9 w-9 rounded-full" />}
+      {(!isServer && !isLastMsgFromSender) && <img referrerPolicy="no-referrer" src={message.profileImage ?? "/default.png"} className="h-9 w-9 rounded-full" />}
       {(!isServer && isLastMsgFromSender) && <div className="w-9" />}
 
       <div className={`${isSender ? colorSender : colorReceiver} py-2 px-3 flex flex-col gap-1 ${message.isAudio && 'w-full'}`}>
