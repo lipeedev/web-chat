@@ -27,8 +27,8 @@ export function ChatMessage({ message, animate = true, isSender, isServer = fals
     immediate: !animate,
   });
 
-  const colorSender = `bg-yellow-300/40 text-white ${!isLastMsgFromSender ? 'rounded-tl-2xl rounded-bl-2xl rounded-br-2xl' : 'rounded-2xl'}`
-  const colorReceiver = `${isServer ? 'bg-yellow-300/20' : 'bg-yellow-100/20'} ${(!isLastMsgFromSender && !isServer) ? 'rounded-bl-2xl rounded-br-2xl rounded-tr-2xl' : 'rounded-2xl'} text-gray-200`
+  const colorSender = `bg-gradient-to-l from-[#D99F84] to-[#F2D6C9] text-[#D99F84] ${!isLastMsgFromSender ? 'rounded-tl-2xl rounded-bl-2xl rounded-br-2xl' : 'rounded-2xl'}`
+  const colorReceiver = `${isServer ? 'text-[#F2D6C9] bg-gradient-to-l from-teal-700/40  to-emerald-900/40' : 'bg-[#7D8074]/80 text-[#F2D6C9]'} ${(!isLastMsgFromSender && !isServer) ? 'rounded-bl-2xl rounded-br-2xl rounded-tr-2xl' : 'rounded-2xl'}`
   if (isServer) {
     message.sender = message.sender[0].toUpperCase() + message.sender.slice(1)
   }
@@ -41,16 +41,16 @@ export function ChatMessage({ message, animate = true, isSender, isServer = fals
       <div className={`${isSender ? colorSender : colorReceiver} py-2 px-3 flex flex-col gap-1 ${message.isAudio && 'w-full'}`}>
         <div className="flex justify-between">
           {!isSender && <span className='font-bold text-md'>{message.sender}</span>}
-          {isServer && <BadgeInfo className="text-yellow-200" />}
+          {isServer && <BadgeInfo className="text-[#D99F84]" />}
         </div>
 
-        <div className="flex justify-between">
+        <div className="flex justify-betwe">
           {
             !message.isAudio
-              ? <p className="pr-4 whitespace-normal break-words text-gray-100">{message.content.trim()}</p>
-              : <AudioPlayer src={message.content} />
+              ? <p className={`pr-4 break-all ${!isSender ? 'text-[#F2E5E4]' : 'text-[#613829]'}`}>{message.content.trim()}</p>
+              : <AudioPlayer isSender={isSender} src={message.content} />
           }
-          <span className="self-end text-gray-300 text-xs">{new Date().toLocaleTimeString('pt-br', { timeStyle: 'short' })}</span>
+          <span className={`self-end text-xs ${!isSender ? 'text-[#D6CAB3]' : 'text-[#8B503A]'}`}>{new Date().toLocaleTimeString('pt-br', { timeStyle: 'short' })}</span>
         </div>
       </div>
     </animated.div>

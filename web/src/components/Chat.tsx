@@ -91,16 +91,16 @@ export function Chat({ profileImage, username, room }: ChatProps) {
     }
 
   }
-  
+
   const handleTyping = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(event.target.value)
     socket?.send(JSON.stringify({ message: '', sender: username, isTyping: true, isAudio: false }));
   }
 
   return (
-    <div className="mx-2 mb-7 py-2 px-4 bg-zinc-900/60 flex flex-col rounded-lg h-screen">
+    <div className="py-2 px-4 flex flex-col rounded-lg h-screen">
       {
-        (usersTyping.length > 0) && <p className="text-yellow-300 text-sm">{usersTyping.length > 3 ? 'several people' : usersTyping.join(' & ')} is typing...</p>
+        (usersTyping.length > 0) && <p className="text-[#D6CAB3] text-sm">{usersTyping.length > 3 ? 'several people' : usersTyping.join(' & ')} is typing...</p>
       }
 
       <div className="mb-1 overflow-x-hidden overflow-y-scroll flex flex-col">
@@ -116,16 +116,16 @@ export function Chat({ profileImage, username, room }: ChatProps) {
         ))}
       </div>
 
-      <div className="relative pt-1 mb-2 flex mt-auto items-center">
+      <div className="relative pt-1 flex mt-auto items-center">
         <input
           value={newMessage}
           onChange={handleTyping}
           placeholder="Message..."
-          className="text-white border-none focus:outline-none py-3 px-4 bg-yellow-300/20 w-full rounded-full"
+          className="text-[#4A2C21] placeholder:text-[#4A2C21] border-none focus:outline-none py-3 px-4 bg-gradient-to-l from-[#D99F84] to-[#7D8074] w-full rounded-full"
         />
 
         <button className="mr-10 absolute right-0" onClick={sendMessage}>
-          <SendHorizonal height={24} width={24} className="text-yellow-100 cursor-pointer" />
+          <SendHorizonal height={24} width={24} className="text-[#F2D6C9] cursor-pointer" />
         </button>
 
         <VoiceRecorder profileImage={profileImage} setCurrentVoiceMsg={setCurrentVoiceMsg} sender={username} setMessages={setMessages} />

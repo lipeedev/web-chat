@@ -50,8 +50,8 @@ export function VoiceRecorder({ profileImage, setCurrentVoiceMsg, setMessages, s
 
       {
         isRecording
-          ? <button onClick={() => setIsRecording(false)}><StopCircle height={26} width={26} className="text-yellow-100" /></button>
-          : <button onClick={() => setIsRecording(true)}><MicIcon height={26} width={26} className="text-yellow-100" /></button>
+          ? <button onClick={() => setIsRecording(false)}><StopCircle height={26} width={26} className="text-[#F2D6C9]" /></button>
+          : <button onClick={() => setIsRecording(true)}><MicIcon height={26} width={26} className="text-[#F2D6C9]" /></button>
       }
     </div>
   )
