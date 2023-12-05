@@ -1,6 +1,7 @@
 import { BadgeInfo } from "lucide-react";
 import { animated, useSpring } from "react-spring";
 import { AudioPlayer } from "./AudioPlayer";
+import { useState } from "react";
 
 interface ChatMessageProps {
   message: ChatMessageData;
@@ -21,14 +22,16 @@ export interface ChatMessageData {
 }
 
 export function ChatMessage({ message, animate = true, isSender, isServer = false, isLastMsgFromSender }: ChatMessageProps) {
+  const [time] = useState(new Date().toLocaleTimeString([], { hour: 'numeric', minute: 'numeric' }))
+
   const animation = useSpring({
     from: { opacity: 0, transform: isSender ? 'translateX(20px)' : 'translateX(-20px)' },
     to: { opacity: 1, transform: 'translateX(0)' },
     immediate: !animate,
   });
 
-  const colorSender = `bg-gradient-to-l from-[#D99F84] to-[#F2D6C9] text-[#D99F84] ${!isLastMsgFromSender ? 'rounded-tl-full rounded-bl-full rounded-br-full' : 'rounded-full'}`
-  const colorReceiver = `${isServer ? 'text-[#F2D6C9] bg-gradient-to-l from-teal-700/40  to-emerald-900/40' : 'bg-[#7D8074]/80 text-[#F2D6C9]'} ${(!isLastMsgFromSender && !isServer) ? 'rounded-bl-full rounded-br-full rounded-tr-full' : 'rounded-full'}`
+  const colorSender = `bg-gradient-to-l from-[#D99F84] to-[#F2D6C9] text-[#D99F84] ${!isLastMsgFromSender ? 'rounded-tl-3xl rounded-bl-3xl rounded-br-3xl' : 'rounded-3xl'}`
+  const colorReceiver = `${isServer ? 'text-[#F2D6C9] bg-gradient-to-l from-teal-700/40  to-emerald-900/40' : 'bg-[#7D8074]/80 text-[#F2D6C9]'} ${(!isLastMsgFromSender && !isServer) ? 'rounded-bl-3xl rounded-br-3xl rounded-tr-3xl' : 'rounded-3xl'}`
   if (isServer) {
     message.sender = message.sender[0].toUpperCase() + message.sender.slice(1)
   }
@@ -47,10 +50,10 @@ export function ChatMessage({ message, animate = true, isSender, isServer = fals
         <div className="mx-1 flex justify-between">
           {
             !message.isAudio
-              ? <p className={`pr-4 break-all ${!isSender ? 'text-[#F2E5E4]' : 'text-[#613829]'}`}>{message.content.trim()}</p>
+              ? <p className={`pr-4 break-words ${!isSender ? 'text-[#F2E5E4]' : 'text-[#613829]'}`}>{message.content.trim()}</p>
               : <AudioPlayer isSender={isSender} src={message.content} />
           }
-          <span className={`self-end text-xs ${!isSender ? 'text-[#D6CAB3]' : 'text-[#8B503A]'}`}>{new Date().toLocaleTimeString('pt-br', { timeStyle: 'short' })}</span>
+          <span className={`self-end text-xs ${!isSender ? 'text-[#D6CAB3]' : 'text-[#8B503A]'}`}>{time}</span>
         </div>
       </div>
     </animated.div>

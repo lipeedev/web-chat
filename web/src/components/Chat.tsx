@@ -99,10 +99,6 @@ export function Chat({ profileImage, username, room }: ChatProps) {
 
   return (
     <div className="py-2 px-4 flex flex-col rounded-lg h-screen">
-      {
-        (usersTyping.length > 0) && <p className="text-[#D6CAB3] text-sm">{usersTyping.length > 3 ? 'several people' : usersTyping.join(' & ')} is typing...</p>
-      }
-
       <div className="mb-1 overflow-x-hidden overflow-y-scroll flex flex-col">
         {(messages.length > 0) && messages.map((data, index) => (
           <ChatMessage
@@ -114,6 +110,12 @@ export function Chat({ profileImage, username, room }: ChatProps) {
             isLastMsgFromSender={messages[index - 1]?.sender === data.sender && !data.isServer}
           />
         ))}
+      </div>
+
+      <div className="h-2 mt-5">
+        {
+          (usersTyping.length > 0) && <p className="text-[#D6CAB3] text-sm">{usersTyping.length > 3 ? 'several people' : usersTyping.join(' & ')} is typing...</p>
+        }
       </div>
 
       <div className="relative pt-1 flex mt-auto items-center">
