@@ -54,7 +54,7 @@ export function App() {
   }
 
   return (
-    <div className="p-2 min-h-screen bg-gradient-to-b from-[#3F4D42] via-zinc-900 to-black">
+    <div className="p-2 overflow-y-hidden h-screen bg-gradient-to-b from-[#3F4D42] via-zinc-900 to-black">
       <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
         <div className={`mx-3 ${(!currentRoom && !username) && 'flex justify-center'}`}>
           {

@@ -50,7 +50,7 @@ export function ChatMessage({ message, animate = true, isSender, isServer = fals
         <div className="mx-1 flex justify-between">
           {
             !message.isAudio
-              ? <p className={`pr-4 break-words ${!isSender ? 'text-[#F2E5E4]' : 'text-[#613829]'}`}>{message.content.trim()}</p>
+              ? <p className={`pr-4 whitespace-pre-wrap break-words ${!isSender ? 'text-[#F2E5E4]' : 'text-[#613829]'}`}>{message.content.trim()}</p>
               : <AudioPlayer isSender={isSender} src={message.content} />
           }
           <span className={`self-end text-xs ${!isSender ? 'text-[#D6CAB3]' : 'text-[#8B503A]'}`}>{time}</span>

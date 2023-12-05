@@ -23,6 +23,7 @@ export function Chat({ profileImage, username, room }: ChatProps) {
   const [usersTyping, setUsersTyping] = useState<string[]>([]);
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [currentVoiceMsg, setCurrentVoiceMsg] = useState<WebSocketMessage | null>(null)
+  const [textAreaHeight, setTextAreaHeight] = useState('auto');
 
   useEffect(() => {
     if (currentVoiceMsg) {
@@ -88,17 +89,33 @@ export function Chat({ profileImage, username, room }: ChatProps) {
       setMessages(prev => [...prev, { content: newMessage, isSender: true, sender: username, profileImage }]);
       socket.send(JSON.stringify({ message: newMessage, sender: username, isTyping: false, isAudio: false, profileImage }));
       setNewMessage('');
+      setTextAreaHeight('auto')
     }
 
   }
 
-  const handleTyping = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTyping = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setNewMessage(event.target.value)
+
+    if (textAreaHeight !== "144px") {
+      autoAdjustTextArea(event.target)
+    }
+
+    if (!newMessage.length) {
+      setTextAreaHeight("auto")
+    }
+
     socket?.send(JSON.stringify({ message: '', sender: username, isTyping: true, isAudio: false }));
   }
 
+  const autoAdjustTextArea = (textarea: HTMLTextAreaElement) => {
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
+    setTextAreaHeight(`${textarea.scrollHeight}px`);
+  };
+
   return (
-    <div className="py-2 px-4 flex flex-col rounded-lg h-screen">
+    <div className="py-2 px-4 pb-14 flex flex-col rounded-lg h-screen">
       <div className="mb-1 overflow-x-hidden overflow-y-scroll flex flex-col">
         {(messages.length > 0) && messages.map((data, index) => (
           <ChatMessage
@@ -119,11 +136,13 @@ export function Chat({ profileImage, username, room }: ChatProps) {
       </div>
 
       <div className="relative pt-1 flex mt-auto items-center">
-        <input
+        <textarea
           value={newMessage}
           onChange={handleTyping}
           placeholder="Message..."
-          className="text-[#4A2C21] placeholder:text-[#4A2C21] border-none focus:outline-none py-3 px-4 bg-gradient-to-l from-[#D99F84] to-[#7D8074] w-full rounded-full"
+          rows={1}
+          style={{ height: textAreaHeight }}
+          className="text-[#4A2C21] placeholder:text-[#4A2C21] border-none focus:outline-none py-3 px-4 bg-gradient-to-l from-[#D99F84] to-[#7D8074] w-full rounded-3xl"
         />
 
         <button className="mr-10 absolute right-0" onClick={sendMessage}>
